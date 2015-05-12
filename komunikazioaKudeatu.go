@@ -7,24 +7,28 @@ import (
 	"net"
 )
 
-func bezeroaKudeatu(conn net.Conn, in io.WriteCloser, out io.ReadCloser, errr io.ReadCloser) {
+func komunikazioaKudeatu(conn net.Conn, in io.WriteCloser, out io.ReadCloser, errr io.ReadCloser) {
 	for {
+
+		//bezeroaren mezua jaso
 		message, err := bufio.NewReader(conn).ReadString('\n')
 		if err != nil {
 			return
 		}
-		fmt.Print("Bidaltzeko mezua:", string(message))
-		// sample process for string received
+
+		//bezeroaren mezua exekutagarriari bidali
 		_, err = in.Write([]byte(message))
 		if err != nil {
 			panic(err)
 		}
+
+		//exekutagarriarengandik mezua jaso
 		a, err := bufio.NewReader(out).ReadString('\n')
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println("aplikaziotik jasotako mezua: ", a)
-		// send new string back to client
+
+		//mezu berria bezeroari bidali
 		conn.Write([]byte(a + "\n"))
 		if err != nil {
 			return

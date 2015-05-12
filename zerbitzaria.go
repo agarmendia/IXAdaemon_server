@@ -8,13 +8,14 @@ import (
 func zerbitzaria() *net.TCPListener {
 
 	fmt.Println("Zerbitzaria abiarazten...\n")
-
+	//zerbitzariaren konfigurazioa
 	service := ":1201"
 	tcpAddr, err := net.ResolveTCPAddr("tcp", service)
-	checkError(err)
+	erroreaAztertu(err)
 
+	//zerbitzaria entzuten jarri
 	ln, err := net.ListenTCP("tcp", tcpAddr)
-	checkError(err)
+	erroreaAztertu(err)
 
 	return ln
 }
