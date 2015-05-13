@@ -1,14 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"io"
 	"os/exec"
 )
 
-func exekutagarriaAbiaratu() (io.WriteCloser, io.ReadCloser, io.ReadCloser) {
+func exekutagarriaAbiaratu(komandoa []string) (io.WriteCloser, io.ReadCloser, io.ReadCloser) {
 
 	//exekutatuko den komandoa
-	cmd := exec.Command("java", "alderantziz")
+	cmd := exec.Command(komandoa[0], komandoa[1])
 
 	//Sarrera, irteera eta errore pipeak berbideratu
 	in, err := cmd.StdinPipe()
@@ -30,6 +31,8 @@ func exekutagarriaAbiaratu() (io.WriteCloser, io.ReadCloser, io.ReadCloser) {
 	if err = cmd.Start(); err != nil {
 		panic(err)
 	}
+
+	fmt.Println("Prozesua martxan da \n")
 
 	return in, out, erro
 }

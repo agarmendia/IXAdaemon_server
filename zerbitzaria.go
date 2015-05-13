@@ -5,11 +5,11 @@ import (
 	"net"
 )
 
-func zerbitzaria() *net.TCPListener {
+func zerbitzaria(portua string) *net.TCPListener {
 
 	fmt.Println("Zerbitzaria abiarazten...\n")
 	//zerbitzariaren konfigurazioa
-	service := ":1201"
+	service := ":" + portua
 	tcpAddr, err := net.ResolveTCPAddr("tcp", service)
 	erroreaAztertu(err)
 
