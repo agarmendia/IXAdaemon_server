@@ -6,24 +6,26 @@ import (
 
 func main() {
 
-	portua, komandoa := argumentuakParseatu()
+	mainPort, ctrlPort, command := parseArguments()
 
-	//Exekutagarria abiarazi, sarrerak eta irteerak berbideratuz
-	in, out, errr := exekutagarriaAbiaratu(komandoa)
-	//zerbitzatzen hasi
-	Listener := zerbitzaria(portua)
+	//Launch native program, redirecting in, out, error pipes
+	in, out, errr := launchNative(command)
+	//Launch server
+	mainListener, _ := initializeServer(mainPort, ctrlPort)
+
+	//go listenState(errr, ctrlPort)
 
 	for {
-		//bezeroa onartu
-		fmt.Println("Zerbitzaria entzuten " + portua + " portuan...\n")
-		conn, err := Listener.Accept()
+		//Accept Client
+		fmt.Println("Server listening on port: " + mainPort + "\n")
+		conn, err := mainListener.Accept()
 		if err != nil {
 			continue
 		}
-		fmt.Println("Bezeroarekin konexioa ireki da\n")
-		//bezero eta exekutagarri harteko komunikazioa kudeatu
-		komunikazioaKudeatu(conn, in, out, errr)
-		fmt.Println("Bezeroarekin konexioa itxi da\n")
+		fmt.Println("Conexion is opened \n")
+		//Manage communication between client and native program
+		manageCommunication(conn, in, out, errr)
+		fmt.Println("Conexion is closed \n")
 		conn.Close()
 	}
 
