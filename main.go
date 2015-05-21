@@ -11,9 +11,9 @@ func main() {
 	//Launch native program, redirecting in, out, error pipes
 	in, out, errr := launchNative(command)
 	//Launch server
-	mainListener, _ := initializeServer(mainPort, ctrlPort)
+	mainListener, ctrlListener := initializeServer(mainPort, ctrlPort)
 
-	//go listenState(errr, ctrlPort)
+	go listenState(errr, ctrlListener)
 
 	for {
 		//Accept Client
@@ -22,10 +22,10 @@ func main() {
 		if err != nil {
 			continue
 		}
-		fmt.Println("Conexion is opened \n")
+		fmt.Println("Conexion opened \n")
 		//Manage communication between client and native program
 		manageCommunication(conn, in, out, errr)
-		fmt.Println("Conexion is closed \n")
+		fmt.Println("Conexion closed \n")
 		conn.Close()
 	}
 

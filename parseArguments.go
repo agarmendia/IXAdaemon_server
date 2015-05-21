@@ -18,7 +18,7 @@ func parseArguments() (string, string, []string) {
 
 	args := flag.Args()
 
-	if len(args) < 2 {
+	if len(args) != 2 {
 		fmt.Println("Usage: wrapper (--mainPort= 2101) (--ctrlPort = 2102) \"language\" \"native program\"")
 		os.Exit(1)
 	}
