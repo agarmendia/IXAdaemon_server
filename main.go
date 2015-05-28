@@ -5,6 +5,7 @@ import (
 )
 
 func main() {
+	//command := [2]string{"java", "atzerapena"}
 
 	mainPort, ctrlPort, command := parseArguments()
 
@@ -22,7 +23,6 @@ func main() {
 		if err != nil {
 			continue
 		}
-		fmt.Println("Conexion opened \n")
 		//Manage communication between client and native program
 		manageCommunication(conn, in, out, errr)
 		fmt.Println("Conexion closed \n")
