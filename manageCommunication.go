@@ -7,6 +7,9 @@ import (
 )
 
 func manageCommunication(conn net.Conn, in io.WriteCloser, out io.ReadCloser, errr io.ReadCloser) {
+
+	//to modify
+
 	for {
 
 		//Get message from client
