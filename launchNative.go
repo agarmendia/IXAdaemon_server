@@ -6,10 +6,17 @@ import (
 	"os/exec"
 )
 
-func launchNative(command []string) (io.WriteCloser, io.ReadCloser, io.ReadCloser) {
+type LaunchedProcess struct {
+	cmd    *exec.Cmd
+	stdin  io.WriteCloser
+	stdout io.ReadCloser
+	stderr io.ReadCloser
+}
+
+func launchNative(command string, args []string) *LaunchedProcess {
 
 	//Command for executing native program
-	cmd := exec.Command(command[0], command[1])
+	cmd := exec.Command(command, args...)
 
 	//Redirect in, out and error pipes
 	in, err := cmd.StdinPipe()
@@ -34,5 +41,5 @@ func launchNative(command []string) (io.WriteCloser, io.ReadCloser, io.ReadClose
 
 	fmt.Println("The native process is running \n")
 
-	return in, out, erro
+	return &LaunchedProcess{cmd, in, out, erro}
 }

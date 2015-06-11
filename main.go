@@ -5,16 +5,19 @@ import (
 )
 
 func main() {
-	//command := [2]string{"java", "atzerapena"}
 
-	mainPort, ctrlPort, command := parseArguments()
+	mainPort, ctrlPort, command, args := parseArguments()
 
 	//Launch native program, redirecting in, out, error pipes
-	in, out, errr := launchNative(command)
+	LaunchedProcess := launchNative(command, args)
+
+	//interceptSignals(LaunchedProcess.cmd)
+
 	//Launch server
 	mainListener, ctrlListener := initializeServer(mainPort, ctrlPort)
+	pe := NewProcessEndpoint(LaunchedProcess)
 
-	go listenState(errr, ctrlListener)
+	go listenState(LaunchedProcess.stderr, ctrlListener)
 
 	for {
 		//Accept Client
@@ -23,8 +26,10 @@ func main() {
 		if err != nil {
 			continue
 		}
-		//Manage communication between client and native program
-		manageCommunication(conn, in, out, errr)
+		se := newServerEndpoint(conn)
+
+		PipeEndpoints(pe, se)
+
 		fmt.Println("Conexion closed \n")
 		conn.Close()
 	}

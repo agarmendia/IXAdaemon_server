@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func parseArguments() (string, string, []string) {
+func parseArguments() (string, string, string, []string) {
 
 	var mainPort string
 	flag.StringVar(&mainPort, "mainPort", "2101", "aplication port")
@@ -18,11 +18,14 @@ func parseArguments() (string, string, []string) {
 
 	args := flag.Args()
 
-	if len(args) != 2 {
+	if len(args) < 2 {
 		fmt.Println("Usage: wrapper (--mainPort= 2101) (--ctrlPort = 2102) \"language\" \"native program\"")
 		os.Exit(1)
 	}
 
-	return mainPort, ctrlPort, args
+	command := args[0]
+	args = args[1:]
+
+	return mainPort, ctrlPort, command, args
 
 }
