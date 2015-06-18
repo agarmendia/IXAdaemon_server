@@ -11,7 +11,7 @@ echo
 echo $STATE
 
 if [ $STATE == "1" ]; then
-	echo "erroraso"
+	echo "error"
 	exit 1
 fi
 

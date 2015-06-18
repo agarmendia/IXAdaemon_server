@@ -2,10 +2,9 @@ package main
 
 import (
 	"bufio"
-
+	"fmt"
 	"io"
 	"net"
-	"strings"
 )
 
 func listenState(stdErr io.ReadCloser, listener *net.TCPListener) {
@@ -34,15 +33,16 @@ func askState(stdErr io.ReadCloser, state *string) {
 		if err != nil {
 			*state = "3"
 		} else {
-			//if strings.Contains(message, "[IXAdaemon]") {
-			if strings.Contains(message, "2") {
+			if message == "[IXAdaemon]INIT" {
+				fmt.Println(message)
 				*state = "1"
-			} else {
-				if strings.Contains(message, "3") {
-					*state = "0"
-				}
 			}
-			//}
+
+			if message == "[IXAdaemon]RUN" {
+				panic(5)
+				*state = "0"
+			}
+
 		}
 	}
 }

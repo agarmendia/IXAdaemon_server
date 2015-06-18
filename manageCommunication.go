@@ -4,45 +4,65 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	//"io/ioutil"
 	"net"
-	"time"
 )
 
 func manageCommunication(conn net.Conn, in io.WriteCloser, out io.ReadCloser, errr io.ReadCloser) {
-	//var a []byte
-	for {
-		//Get message from client
-		message, err := bufio.NewReader(conn).ReadString('\n')
-		fmt.Println(message)
-		if err != nil {
-			break
-		}
-		//Send message to native program
-		_, err = in.Write([]byte(message))
-		if err != nil {
-			break
-		}
+	c := make(chan struct{})
+	ch := make(chan struct{})
+	scanner := bufio.NewScanner(conn)
+	bufout := bufio.NewWriter(conn)
+	go writetonative(*scanner, in, c)
+	go readfromnative(*bufout, out, ch)
+	<-c
+	fmt.Println("endwritetonative")
+	<-ch
+	fmt.Println("endreadfromnative")
 
-		for {
-			//Get message from native program
-			a, _, _ := bufio.NewReader(out).ReadLine()
-			if string(a) == "bukatu da" {
-				break
-			}
-			time.Sleep(time.Second)
-			fmt.Print("erantzuna: ")
-			fmt.Println(string(a))
-			if err != nil {
-				fmt.Println("errooorr")
-				break
-			}
-			//Send message to client
-			_, err = conn.Write([]byte(string(a) + "\n"))
-			if err != nil {
-				break
-			}
+}
 
+func writetonative(scanner bufio.Scanner, in io.WriteCloser, c chan struct{}) {
+
+	scanner.Split(bufio.ScanLines)
+	for scanner.Scan() {
+		message := scanner.Text()
+		in.Write([]byte(message + "\n"))
+
+		if message == "[IXAdaemon]EOF" {
+			fmt.Println("manageCommunicationek [IXAdaemon]EOF jaso du")
+			break
 		}
 	}
+	c <- struct{}{}
+	return
+}
+
+func readfromnative(bufout bufio.Writer, out io.ReadCloser, c chan struct{}) {
+
+	for {
+		a, _, err := bufio.NewReader(out).ReadLine()
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		_, err = bufout.WriteString(string(a))
+		if err != nil {
+			fmt.Println(err)
+		}
+		_, err = bufout.WriteString("\n")
+		if err != nil {
+			fmt.Println(err)
+		}
+		err = bufout.Flush()
+		if err != nil {
+			fmt.Println(err)
+		}
+		if string(a) == "[IXAdaemon]EOD" {
+			fmt.Println("manageCommunicationek [IXAdaemon]EOD jaso du")
+			break
+		}
+	}
+	c <- struct{}{}
+	return
+
 }

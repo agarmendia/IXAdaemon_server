@@ -11,25 +11,21 @@ func main() {
 	//Launch native program, redirecting in, out, error pipes
 	LaunchedProcess := launchNative(command, args)
 
-	//interceptSignals(LaunchedProcess.cmd)
+	interceptSignals(LaunchedProcess.cmd)
 
 	//Launch server
 	mainListener, ctrlListener := initializeServer(mainPort, ctrlPort)
-	pe := NewProcessEndpoint(LaunchedProcess)
 
 	go listenState(LaunchedProcess.stderr, ctrlListener)
 
 	for {
 		//Accept Client
 		fmt.Println("Server listening on port: " + mainPort + "\n")
-		conn, err := mainListener.Accept()
+		conn, err := mainListener.AcceptTCP()
 		if err != nil {
 			continue
 		}
-		se := newServerEndpoint(conn)
-
-		PipeEndpoints(pe, se)
-
+		manageCommunication(conn, LaunchedProcess.stdin, LaunchedProcess.stdout, LaunchedProcess.stderr)
 		fmt.Println("Conexion closed \n")
 		conn.Close()
 	}
