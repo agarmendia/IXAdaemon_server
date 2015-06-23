@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"strings"
 )
 
 func listenState(stdErr io.ReadCloser, listener *net.TCPListener) {
@@ -31,16 +32,20 @@ func askState(stdErr io.ReadCloser, state *string) {
 	for {
 		message, err := bufio.NewReader(stdErr).ReadString('\n')
 		if err != nil {
+			fmt.Println(err)
+			panic(32)
 			*state = "3"
 		} else {
-			if message == "[IXAdaemon]INIT" {
+			//if message == "[IXAdaemon]INIT\n" {
+			if strings.Contains(message, "[IXAdaemon]INIT") {
 				fmt.Println(message)
 				*state = "1"
-			}
-
-			if message == "[IXAdaemon]RUN" {
-				panic(5)
-				*state = "0"
+			} else {
+				if strings.Contains(message, "[IXAdaemon]RUN") {
+					panic(3)
+					fmt.Println("[IXAdaemon]RUn !! ostai")
+					*state = "0"
+				}
 			}
 
 		}
