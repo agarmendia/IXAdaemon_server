@@ -18,8 +18,8 @@ func parseArguments() (string, string, string, []string) {
 
 	args := flag.Args()
 
-	if len(args) < 2 {
-		fmt.Println("Usage: wrapper (--mainPort= 2101) (--ctrlPort = 2102) \"language\" \"native program\"")
+	if len(args) < 1 {
+		fmt.Println("Usage: wrapper (--mainPort= 2101) (--ctrlPort = 2102) \"command\"")
 		os.Exit(1)
 	}
 

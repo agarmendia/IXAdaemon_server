@@ -31,6 +31,7 @@ func askState(stdErr io.ReadCloser, state *string) {
 
 	for {
 		message, err := bufio.NewReader(stdErr).ReadString('\n')
+		fmt.Println("Hau da estadoa: " + *state)
 		if err != nil {
 			fmt.Println(err)
 			panic(32)
@@ -42,7 +43,7 @@ func askState(stdErr io.ReadCloser, state *string) {
 				*state = "1"
 			} else {
 				if strings.Contains(message, "[IXAdaemon]RUN") {
-					panic(3)
+
 					fmt.Println("[IXAdaemon]RUn !! ostai")
 					*state = "0"
 				}
