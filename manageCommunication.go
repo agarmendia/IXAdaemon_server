@@ -46,7 +46,7 @@ func readfromnative(bufout bufio.Writer, out io.ReadCloser, c chan struct{}) {
 	for sc.Scan() {
 		message := sc.Text()
 		//fmt.Print("======RECEIVE=====")
-		//fmt.Println(string(message))
+		//fmt.Print(string(message))
 		bufout.WriteString(message)
 		bufout.WriteString("\n")
 		bufout.Flush()
