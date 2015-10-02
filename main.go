@@ -25,7 +25,7 @@ func main() {
 		if err != nil {
 			continue
 		}
-		manageCommunication(conn, LaunchedProcess.stdin, LaunchedProcess.stdout, LaunchedProcess.stderr)
+		manageCommunication(conn, LaunchedProcess.stdin, LaunchedProcess.stdout, LaunchedProcess.stderr, ctrlPort)
 		fmt.Println("Conexion closed \n")
 		conn.Close()
 	}

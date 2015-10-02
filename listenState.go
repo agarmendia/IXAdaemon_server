@@ -20,7 +20,6 @@ func listenState(stdErr io.ReadCloser, listener *net.TCPListener) {
 		}
 
 		go askState(stdErr, &state)
-
 		go writeState(conn, &state)
 
 	}
@@ -34,18 +33,17 @@ func askState(stdErr io.ReadCloser, state *string) {
 		fmt.Println("Hau da estadoa: " + *state)
 		if err != nil {
 			fmt.Println(err)
-			panic(32)
 			*state = "3"
 		} else {
-			//if message == "[IXAdaemon]INIT\n" {
 			if strings.Contains(message, "[IXAdaemon]INIT") {
+				//panic(1)
 				fmt.Println(message)
 				*state = "1"
 			} else {
 				if strings.Contains(message, "[IXAdaemon]RUN") {
-
-					fmt.Println("[IXAdaemon]RUn !! ostai")
+					//panic(2)
 					*state = "0"
+					//break
 				}
 			}
 
