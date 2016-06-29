@@ -10,6 +10,6 @@ func fixNative(command string, args []string, ctrlListener *net.TCPListener) *La
 
 	lp := launchNative(command, args)
 
-	listenState(lProcess.stderr, ctrlListener)
+	go listenState(lProcess.stderr, ctrlListener)
 	return &LaunchedProcess{lp.cmd, lp.stdin, lp.stdout, lp.stderr}
 }

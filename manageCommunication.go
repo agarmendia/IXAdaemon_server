@@ -12,27 +12,19 @@ import (
 func manageCommunication(conn net.Conn, ctrlPort string, command string, args []string) error {
 	writech := make(chan bool)
 	readch := make(chan bool)
+	commch := make(chan bool)
 
 	scanner := bufio.NewScanner(conn)
 	bufout := bufio.NewWriter(conn)
-	go writetonative(*scanner, lProcess.stdin, writech)
-	go func() {
-		checked := make(chan bool)
-		go readfromnative(*bufout, lProcess.stdout, readch, checked)
-		select {
-		case <-checked:
-			readch <- true
-			return
+	go writetonative(*scanner, lProcess.stdin, writech, commch)
 
-		case <-time.After(10 * time.Second):
-			readch <- false
-			return
-		}
-	}()
+	//checked := make(chan bool)
+	go readfromnative(*bufout, lProcess.stdout, readch, commch, writech)
 
 	correctWriting := <-writech
 	if correctWriting == false {
 		return errors.New("Communication failure: Writing to Native")
+		panic(10)
 	}
 
 	fmt.Println("endwritetonative")
@@ -45,7 +37,7 @@ func manageCommunication(conn net.Conn, ctrlPort string, command string, args []
 	return nil
 }
 
-func writetonative(scanner bufio.Scanner, in io.WriteCloser, c chan bool) {
+func writetonative(scanner bufio.Scanner, in io.WriteCloser, c chan bool, commch chan bool) {
 
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
@@ -55,23 +47,53 @@ func writetonative(scanner bufio.Scanner, in io.WriteCloser, c chan bool) {
 		_, err := in.Write([]byte(message + "\n"))
 		if err != nil {
 			c <- false
+			break
 		}
 		if message == "[IXAdaemon]EOF" {
 			//fmt.Println("manageCommunication has recived [IXAdaemon]EOF")
 			c <- true
+			commch <- true
 			break
 		}
 	}
 	return
 }
 
-func readfromnative(bufout bufio.Writer, out io.ReadCloser, c chan bool, checked chan bool) {
+func readfromnative(bufout bufio.Writer, out io.ReadCloser, c chan bool, commch chan bool, writech chan bool) {
+	<-commch
 	sc := bufio.NewScanner(out)
+	var message string
 	sc.Split(bufio.ScanLines)
-	for sc.Scan() {
-		message := sc.Text()
+	for true {
+		//fmt.Println("eii")
+		ch := make(chan bool)
+		go func() {
+			sc.Scan()
+			//if err != nil {
+			//	ch <- false
+			//} else {
+			ch <- true
+			//}
+			return
+		}()
+		select {
+		case correct := <-ch:
+			if correct == true {
+				message = sc.Text()
+			} else {
+				c <- false
+				return
+			}
+		case <-time.After(time.Second * 10):
+			fmt.Println("TIMEOUT")
+			writech <- true
+			c <- false
+			return
+		}
+
+		//message := sc.Text()
 		//fmt.Print("======RECEIVE=====")
-		//fmt.Print(string(message))
+		//fmt.Println(string(message))
 		bufout.WriteString(message)
 		bufout.WriteString("\n")
 		bufout.Flush()
@@ -81,7 +103,7 @@ func readfromnative(bufout bufio.Writer, out io.ReadCloser, c chan bool, checked
 		}
 	}
 	c <- true
-	checked <- true
+	//checked <- true
 	return
 }
 

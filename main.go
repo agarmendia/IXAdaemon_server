@@ -37,6 +37,8 @@ func main() {
 
 		if err != nil {
 			fmt.Println(err.Error())
+
+			//In case of communication goes wrong, relaunch Native
 			lProcess = fixNative(command, args, ctrlListener)
 		}
 		fmt.Println("Conexion closed \n")
