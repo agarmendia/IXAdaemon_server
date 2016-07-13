@@ -1,13 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"net"
 )
 
-func fixNative(command string, args []string, ctrlListener *net.TCPListener) *LaunchedProcess {
-	fmt.Println("Fixing Native")
-
+func fixNative(command string, args []string, ctrlListener *net.TCPListener, currentDoc []string) *LaunchedProcess {
+	dlog.Println("Fixing Native")
+	dlog.Println(currentDoc)
 	lp := launchNative(command, args)
 
 	go listenState(lProcess.stderr, ctrlListener)

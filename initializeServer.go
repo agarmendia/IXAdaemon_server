@@ -8,7 +8,7 @@ import (
 
 func initializeServer(mainPort string, ctrlPort string) (*net.TCPListener, *net.TCPListener) {
 
-	fmt.Println("Launching server...\n")
+	dlog.Println("Launching server...\n")
 
 	//Server configurations
 

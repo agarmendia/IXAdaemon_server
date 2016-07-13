@@ -3,54 +3,52 @@ package main
 import (
 	"bufio"
 	"errors"
-	"fmt"
 	"io"
 	"net"
 	"time"
 )
 
-func manageCommunication(conn net.Conn, ctrlPort string, command string, args []string) error {
+func manageCommunication(conn net.Conn, ctrlPort string, command string, args []string) (error, []string) {
 	writech := make(chan bool)
 	readch := make(chan bool)
 	commch := make(chan bool)
+	currentDoc := []string{}
 
 	scanner := bufio.NewScanner(conn)
 	bufout := bufio.NewWriter(conn)
-	go writetonative(*scanner, lProcess.stdin, writech, commch)
+	go writetonative(*scanner, lProcess.stdin, writech, commch, &currentDoc)
 
-	//checked := make(chan bool)
 	go readfromnative(*bufout, lProcess.stdout, readch, commch, writech)
 
 	correctWriting := <-writech
 	if correctWriting == false {
-		return errors.New("Communication failure: Writing to Native")
+		return errors.New("Communication failure: Writing to Native"), currentDoc
 		panic(10)
 	}
 
-	fmt.Println("endwritetonative")
 	correctReading := <-readch
+
 	if correctReading == false {
-		return errors.New("Communication failure: Writing to Native")
+		return errors.New("Communication failure: Writing to Native"), currentDoc
 	}
 
-	fmt.Println("endreadfromnative")
-	return nil
+	return nil, nil
 }
 
-func writetonative(scanner bufio.Scanner, in io.WriteCloser, c chan bool, commch chan bool) {
+func writetonative(scanner bufio.Scanner, in io.WriteCloser, c chan bool, commch chan bool, currentDoc *[]string) {
 
 	scanner.Split(bufio.ScanLines)
 	for scanner.Scan() {
 		message := scanner.Text()
-		//fmt.Print("=======SEND=======")
-		//fmt.Println(string(message))
+		*currentDoc = append(*currentDoc, message) //may be useful for not losing information.
+
 		_, err := in.Write([]byte(message + "\n"))
 		if err != nil {
 			c <- false
 			break
 		}
 		if message == "[IXAdaemon]EOF" {
-			//fmt.Println("manageCommunication has recived [IXAdaemon]EOF")
+
 			c <- true
 			commch <- true
 			break
@@ -60,20 +58,18 @@ func writetonative(scanner bufio.Scanner, in io.WriteCloser, c chan bool, commch
 }
 
 func readfromnative(bufout bufio.Writer, out io.ReadCloser, c chan bool, commch chan bool, writech chan bool) {
+
+	//waits until writetonative finishes (to manage timeouts)
 	<-commch
 	sc := bufio.NewScanner(out)
 	var message string
 	sc.Split(bufio.ScanLines)
 	for true {
-		//fmt.Println("eii")
+
 		ch := make(chan bool)
 		go func() {
 			sc.Scan()
-			//if err != nil {
-			//	ch <- false
-			//} else {
 			ch <- true
-			//}
 			return
 		}()
 		select {
@@ -84,30 +80,20 @@ func readfromnative(bufout bufio.Writer, out io.ReadCloser, c chan bool, commch 
 				c <- false
 				return
 			}
-		case <-time.After(time.Second * 10):
-			fmt.Println("TIMEOUT")
-			writech <- true
+		case <-time.After(time.Minute * 10):
+			dlog.Println("TIMEOUT")
 			c <- false
 			return
 		}
 
-		//message := sc.Text()
-		//fmt.Print("======RECEIVE=====")
-		//fmt.Println(string(message))
 		bufout.WriteString(message)
 		bufout.WriteString("\n")
 		bufout.Flush()
 		if message == "[IXAdaemon]EOD" {
-			//fmt.Println("manageCommunicationek has received [IXAdaemon]EOD")
+
 			break
 		}
 	}
 	c <- true
-	//checked <- true
 	return
-}
-
-func reconnect(conn net.Conn, ctrlPort string, command string, args []string) *LaunchedProcess {
-	LaunchedProcess := launchNative(command, args)
-	return LaunchedProcess
 }

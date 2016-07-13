@@ -10,7 +10,7 @@ import (
 
 func listenState(stdErr io.ReadCloser, listener *net.TCPListener) {
 	var state string
-	state = "3"
+	state = "2"
 	for {
 
 		conn, err := listener.Accept()
@@ -30,10 +30,10 @@ func askState(stdErr io.ReadCloser, state *string) {
 
 	for {
 		message, err := bufio.NewReader(stdErr).ReadString('\n')
-		fmt.Println("Hau da estadoa: " + *state)
+		fmt.Println("Status: " + *state)
 		if err != nil {
 			fmt.Println(err)
-			*state = "3"
+			*state = "2"
 		} else {
 			if strings.Contains(message, "[IXAdaemon]INIT") {
 				//panic(1)

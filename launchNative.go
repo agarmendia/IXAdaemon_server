@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io"
 	"os/exec"
 )
@@ -39,7 +38,7 @@ func launchNative(command string, args []string) *LaunchedProcess {
 		panic(err)
 	}
 
-	fmt.Println("The native process is running \n")
+	dlog.Println("The native process is running \n")
 
 	return &LaunchedProcess{cmd, in, out, erro}
 }

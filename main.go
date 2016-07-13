@@ -1,15 +1,19 @@
 package main
 
 import (
-	"fmt"
+	"log"
 )
 
 var lProcess *LaunchedProcess
+var dlog *log.Logger
 
 func main() {
 
 	//Parse arguments from command line
-	mainPort, ctrlPort, command, args := parseArguments()
+	mainPort, ctrlPort, command, args, logFile := parseArguments()
+
+	//Initialize logger
+	dlog = initializeLogger(logFile)
 
 	//Launch native program, redirecting in, out, error pipes
 	lProcess = launchNative(command, args)
@@ -25,7 +29,7 @@ func main() {
 
 	for {
 		//Accept Client
-		fmt.Println("Server listening on port: " + mainPort + "\n")
+		dlog.Println("Server listening on port: " + mainPort + "\n")
 		conn, err := mainListener.AcceptTCP()
 
 		if err != nil {
@@ -33,15 +37,14 @@ func main() {
 		}
 
 		//Manage Client <-> Native communication
-		err = manageCommunication(conn, ctrlPort, command, args)
-
+		err, currentDoc := manageCommunication(conn, ctrlPort, command, args)
 		if err != nil {
-			fmt.Println(err.Error())
+			dlog.Println(err.Error())
 
 			//In case of communication goes wrong, relaunch Native
-			lProcess = fixNative(command, args, ctrlListener)
+			lProcess = fixNative(command, args, ctrlListener, currentDoc)
 		}
-		fmt.Println("Conexion closed \n")
+		dlog.Println("Conexion closed \n")
 		conn.Close()
 	}
 

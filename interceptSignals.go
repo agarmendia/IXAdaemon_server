@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -15,7 +14,7 @@ func interceptSignals(cmd *exec.Cmd) {
 		sig := <-signalChannel
 		switch sig {
 		case syscall.SIGTERM:
-			fmt.Println("case 2, sigterm")
+			dlog.Println("Server hard close [SIGTERM]")
 			cmd.Process.Kill()
 			os.Exit(1)
 		}
